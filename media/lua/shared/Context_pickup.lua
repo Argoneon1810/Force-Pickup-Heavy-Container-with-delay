@@ -55,39 +55,24 @@ end
 function FPHC.ContextOptionPickupWorld(isoWorldInventoryObject, pIndex, inventoryItem)
     --prepare values
     local pObject = getSpecificPlayer(pIndex)
-    local pInventory = pObject:getInventory()
+    local pItemContainer = pObject:getInventory()
+    local isoGridSquare = isoWorldInventoryObject:getSquare()
 
-    --remove from world
-    isoWorldInventoryObject:getSquare():transmitRemoveItemFromSquare(isoWorldInventoryObject)
-    isoWorldInventoryObject:removeFromWorld()
-    isoWorldInventoryObject:removeFromSquare()
-    isoWorldInventoryObject:setSquare(nil)
+    --if the item is far, walk to the isoGridSquare of the item lying and pickup. else, pickup now.
+    local distance = FPHC.distanceAB(FPHC.asPos(pObject), FPHC.asPos(isoGridSquare))
+    if distance:sqrMagnitude() >= 1 then    --this '1' has to be 1^1, but thats effectively the same so leave as 1.
+        ISTimedActionQueue.add(ISWalkToTimedAction:new(pObject, isoGridSquare))
+    end
 
-    inventoryItem:setWorldItem(nil)
-    inventoryItem:setJobDelta(0.0)
-
-    --add to player inventory
-    pInventory:setDrawDirty(true)
-    pInventory:AddItem(inventoryItem)
+    ISTimedActionQueue.add(FPHC.FPHC_TimedAction:new(pObject, isoWorldInventoryObject, isoWorldInventoryObject:getSquare(), inventoryItem, pItemContainer))
 end
 
 function FPHC.ContextOptionPickupInventory(inventoryContainer, pObject)
     --prepare values
     local pItemContainer = pObject:getInventory()
+    local isoWorldInventoryObject = inventoryContainer:getWorldItem()
 
-    --remove from world
-    local wi = inventoryContainer:getWorldItem()
-    wi:getSquare():transmitRemoveItemFromSquare(wi)
-    wi:removeFromWorld()
-    wi:removeFromSquare()
-    wi:setSquare(nil)
-    inventoryContainer:setWorldItem(nil)
-    inventoryContainer:setJobDelta(0.0)
-
-    --add to player inventory
-    pItemContainer:setDrawDirty(true)
-    pItemContainer:AddItem(inventoryContainer)
-    inventoryContainer:setContainer(pItemContainer)
+    ISTimedActionQueue.add(FPHC.FPHC_TimedAction:new(pObject, isoWorldInventoryObject, isoWorldInventoryObject:getSquare(), inventoryContainer, pItemContainer))
 end
 
 function FPHC.WorldObjectContextMenu(pIndex, iSContextMenu, isoWorldInventoryObjects, bTest)
@@ -96,10 +81,6 @@ function FPHC.WorldObjectContextMenu(pIndex, iSContextMenu, isoWorldInventoryObj
 
     local pObject = getSpecificPlayer(pIndex)
     local isoGridSquare = isoWorldInventoryObjects[1]:getSquare()
-
-    --if the item isnt close enough to a character, do not show context.
-    local distance = FPHC.distanceAB(FPHC.asPos(pObject), FPHC.asPos(isoGridSquare))
-    if distance:sqrMagnitude() > 1 then return end  --this '1' has to be 1^1, but thats effectively the same so leave as 1.
 
     local allItems = FPHC.getAllItemsIn(isoGridSquare)
     local pInventory = pObject:getInventory()
