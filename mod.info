@@ -1,0 +1,5 @@
+name=Force Pickup Heavy Container (with delay)
+poster=Poster.png
+id=FPHC_D
+description=Allow player to pickup heavy container (like HCHanddolly, HCForklift, etc.) beyond its weight limit.
+description=this version has a reasonable delay to pickup.
