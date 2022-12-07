@@ -93,7 +93,13 @@ function FPHC.WorldObjectContextMenu(pIndex, iSContextMenu, isoWorldInventoryObj
 end
 
 function FPHC.InventoryObjectContextMenu(pIndex, iSContextMenu, itemsAsTable)
+    --for some reason this could be nil, so doing nil check
+    if itemsAsTable == nil then return end
+
     local inventoryContainer = itemsAsTable[1]
+
+    --for some reason this could be nil, so doing nil check
+    if inventoryContainer == nil then return end
 
     --if item is not a container, return
     if not instanceof(inventoryContainer, "InventoryContainer") then inventoryContainer = inventoryContainer.items[1] end
@@ -112,4 +118,4 @@ function FPHC.InventoryObjectContextMenu(pIndex, iSContextMenu, itemsAsTable)
 end
 
 Events.OnFillWorldObjectContextMenu.Add(FPHC.WorldObjectContextMenu)
-Events.OnFillInventoryObjectContextMenu.Add(FPHC.InventoryObjectContextMenu)    
+Events.OnFillInventoryObjectContextMenu.Add(FPHC.InventoryObjectContextMenu)
